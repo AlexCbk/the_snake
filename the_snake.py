@@ -44,6 +44,7 @@ class GameObject:
     """Базовый класс, содержит общие атрибуты игрового поля."""
 
     def __init__(self):
+        """Инициализирует базовые атрибуты объекта."""
         self.position = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
         self.body_color = None
 
@@ -56,6 +57,7 @@ class Apple(GameObject):
     """Унаследованный класс, описывающий яблоко и действия с ним."""
 
     def __init__(self):
+        """Задает цвет и начальную позицию яблока."""
         super().__init__()
         self.body_color = APPLE_COLOR
         self.randomize_position()
@@ -78,6 +80,7 @@ class Snake(GameObject):
     """Унаследованный класс, описывающий змейку и ее поведение."""
 
     def __init__(self):
+        """Инициализирует начальное состояние змейки."""
         super().__init__()
         self.body_color = SNAKE_COLOR
         self.length = 1
@@ -96,9 +99,10 @@ class Snake(GameObject):
         # Обозначение координат змейки с учётом направления движения
         snake_x, snake_y = self.positions[0]
         dir_x, dir_y = self.direction
-        snake_head = (snake_x + dir_x * GRID_SIZE, snake_y + dir_y * GRID_SIZE)
+        snake_head = (snake_x + dir_x * GRID_SIZE,
+                      snake_y + dir_y * GRID_SIZE)
 
-        # Столкновение со стенами и перемещение на противоположную сторону поля
+        # Столкновение со стенами и перемещение на противоположную сторону
         if snake_head[0] < 0:
             snake_head = (SCREEN_WIDTH - GRID_SIZE, snake_head[1])
         elif snake_head[0] >= SCREEN_WIDTH:
