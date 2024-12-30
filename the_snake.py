@@ -58,9 +58,9 @@ class Apple(GameObject):
         """Задает цвет и начальную позицию яблока."""
         super().__init__()
         self.body_color = color
-        self.randomize_position(snake_pos=[])
+        self.randomize_position(snake_position=self.position)
 
-    def randomize_position(self, snake_pos):
+    def randomize_position(self, snake_position):
         """
         Устанавливает случайную позицию яблока, убедившись, что она
         не совпадает с занятыми позициями змейки.
@@ -70,7 +70,7 @@ class Apple(GameObject):
                 randrange(0, SCREEN_WIDTH, GRID_SIZE),
                 randrange(0, SCREEN_HEIGHT, GRID_SIZE)
             )
-            if self.position not in snake_pos:
+            if self.position not in snake_position:
                 break
 
     def draw(self):
@@ -97,11 +97,9 @@ class Snake(GameObject):
         """Обновляет позицию змейки (по координатам)."""
         snake_x, snake_y = self.get_head_position()
         dir_x, dir_y = self.direction
-        snake_head = (snake_x + dir_x * GRID_SIZE,
-                      snake_y + dir_y * GRID_SIZE)
         snake_head = (
-            (snake_head[0] + SCREEN_WIDTH) % SCREEN_WIDTH,
-            (snake_head[1] + SCREEN_HEIGHT) % SCREEN_HEIGHT
+            ((snake_x + dir_x * GRID_SIZE) + SCREEN_WIDTH) % SCREEN_WIDTH,
+            ((snake_y + dir_y * GRID_SIZE) + SCREEN_HEIGHT) % SCREEN_HEIGHT
         )
         self.positions.insert(0, snake_head)
         if len(self.positions) > self.length:
@@ -133,7 +131,6 @@ def handle_keys(snake):
     """Обрабатывает нажатие клавиш (движение змейки)."""
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            pygame.quit()
             return False
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_UP and snake.direction != DOWN:
@@ -144,6 +141,7 @@ def handle_keys(snake):
                 snake.next_direction = LEFT
             elif event.key == pygame.K_RIGHT and snake.direction != LEFT:
                 snake.next_direction = RIGHT
+    return True
 
 
 def main():
@@ -154,19 +152,25 @@ def main():
     screen.fill(BOARD_BACKGROUND_COLOR)
     while True:
         clock.tick(SPEED)
-        handle_keys(snake)
-        snake.update_direction()
-        snake.move()
-        head_snake = snake.get_head_position()
-        if head_snake == apple.position:
-            snake.length += 1
-            apple.randomize_position(snake.positions)
-        if head_snake in snake.positions[1:]:
-            screen.fill(BOARD_BACKGROUND_COLOR)
-            snake.reset()
-        apple.draw()
-        snake.draw()
-        pygame.display.update()
+        try:
+            if not handle_keys(snake):
+                break
+            snake.update_direction()
+            snake.move()
+            head_snake = snake.get_head_position()
+            if head_snake == apple.position:
+                snake.length += 1
+                apple.randomize_position(snake.positions)
+            if head_snake in snake.positions[1:]:
+                screen.fill(BOARD_BACKGROUND_COLOR)
+                snake.reset()
+            apple.draw()
+            snake.draw()
+            pygame.display.update()
+        except Exception as e:
+            print(f'Произошла ошибка: {e}')
+            break
+    pygame.quit()
 
 
 if __name__ == '__main__':
