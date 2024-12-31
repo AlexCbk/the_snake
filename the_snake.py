@@ -7,7 +7,7 @@ SCREEN_WIDTH, SCREEN_HEIGHT = 640, 480
 GRID_SIZE = 20
 GRID_WIDTH = SCREEN_WIDTH // GRID_SIZE
 GRID_HEIGHT = SCREEN_HEIGHT // GRID_SIZE
-
+CENTER_FIELD = SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2
 # Направления движения:
 UP = (0, -1)
 DOWN = (0, 1)
@@ -44,7 +44,7 @@ class GameObject:
 
     def __init__(self):
         """Инициализирует базовые атрибуты объекта."""
-        self.position = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
+        self.position = (CENTER_FIELD)
         self.body_color = None
 
     def draw(self):
@@ -54,23 +54,32 @@ class GameObject:
 class Apple(GameObject):
     """Описывает яблоко и действия с ним."""
 
-    def __init__(self, color=APPLE_COLOR):
-        """Задает цвет и начальную позицию яблока."""
+    def __init__(self, snake_positions=None, color=APPLE_COLOR):
+        """
+        Задает цвет и начальную позицию яблока.
+        Параметры:
+        snake_positions - принимает список с позицией змейки;
+        color - принимает цвет яблока.
+        """
         super().__init__()
         self.body_color = color
-        self.randomize_position(snake_position=self.position)
+        self.randomize_position(snake_positions=CENTER_FIELD)
 
-    def randomize_position(self, snake_position):
+    def randomize_position(self, snake_positions):
         """
         Устанавливает случайную позицию яблока, убедившись, что она
         не совпадает с занятыми позициями змейки.
+        Параметры:
+        snake_positions - принимает список позиций змейки snake.positions
+        в функции main(), по умолчанию значение равно центру
+        игрового поля (место спавна змейки).
         """
         while True:
             self.position = (
                 randrange(0, SCREEN_WIDTH, GRID_SIZE),
                 randrange(0, SCREEN_HEIGHT, GRID_SIZE)
             )
-            if self.position not in snake_position:
+            if self.position not in snake_positions:
                 break
 
     def draw(self):
@@ -148,29 +157,24 @@ def main():
     """Основной цикл игры."""
     pygame.init()
     snake = Snake()
-    apple = Apple()
+    apple = Apple(snake)
     screen.fill(BOARD_BACKGROUND_COLOR)
     while True:
         clock.tick(SPEED)
-        try:
-            if not handle_keys(snake):
-                break
-            snake.update_direction()
-            snake.move()
-            head_snake = snake.get_head_position()
-            if head_snake == apple.position:
-                snake.length += 1
-                apple.randomize_position(snake.positions)
-            if head_snake in snake.positions[1:]:
-                screen.fill(BOARD_BACKGROUND_COLOR)
-                snake.reset()
-            apple.draw()
-            snake.draw()
-            pygame.display.update()
-        except Exception as e:
-            print(f'Произошла ошибка: {e}')
-            break
-    pygame.quit()
+        if handle_keys(snake) is False:
+            pygame.quit()
+        snake.update_direction()
+        snake.move()
+        head_snake = snake.get_head_position()
+        if head_snake == apple.position:
+            snake.length += 1
+            apple.randomize_position(snake.positions)
+        if head_snake in snake.positions[1:]:
+            screen.fill(BOARD_BACKGROUND_COLOR)
+            snake.reset()
+        apple.draw()
+        snake.draw()
+        pygame.display.update()
 
 
 if __name__ == '__main__':
