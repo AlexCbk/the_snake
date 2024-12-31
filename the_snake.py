@@ -2,6 +2,9 @@ from random import randrange
 
 import pygame
 
+import sys
+
+
 # Константы для размеров поля и сетки:
 SCREEN_WIDTH, SCREEN_HEIGHT = 640, 480
 GRID_SIZE = 20
@@ -44,7 +47,7 @@ class GameObject:
 
     def __init__(self):
         """Инициализирует базовые атрибуты объекта."""
-        self.position = (CENTER_FIELD)
+        self.position = CENTER_FIELD
         self.body_color = None
 
     def draw(self):
@@ -63,7 +66,7 @@ class Apple(GameObject):
         """
         super().__init__()
         self.body_color = color
-        self.randomize_position(snake_positions=CENTER_FIELD)
+        self.randomize_position(snake_positions=[CENTER_FIELD])
 
     def randomize_position(self, snake_positions):
         """
@@ -130,7 +133,7 @@ class Snake(GameObject):
 
     def reset(self):
         """Сбрасывает змейку в начальное состояние."""
-        self.positions = [(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)]
+        self.positions = [CENTER_FIELD]
         self.length = 1
         self.direction = RIGHT
         self.next_direction = None
@@ -163,6 +166,7 @@ def main():
         clock.tick(SPEED)
         if handle_keys(snake) is False:
             pygame.quit()
+            sys.exit(1)
         snake.update_direction()
         snake.move()
         head_snake = snake.get_head_position()
